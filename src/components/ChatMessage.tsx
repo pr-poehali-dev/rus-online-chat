@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
@@ -20,7 +19,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
     >
       {sender !== 'user' && (
-        <Avatar className="h-8 w-8 mr-2">
+        <Avatar className="h-8 w-8 mr-2 transition-all duration-300 hover:scale-110">
           <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${username}`} />
           <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
@@ -29,9 +28,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div 
         className={`max-w-[70%] rounded-lg px-4 py-2 ${
           sender === 'user' 
-            ? 'bg-primary text-primary-foreground' 
-            : 'bg-secondary text-secondary-foreground'
-        }`}
+            ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+            : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
+        } transition-all duration-300 hover:shadow-md`}
       >
         {sender !== 'user' && (
           <div className="font-semibold text-xs mb-1">{username}</div>
@@ -43,7 +42,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
 
       {sender === 'user' && (
-        <Avatar className="h-8 w-8 ml-2">
+        <Avatar className="h-8 w-8 ml-2 transition-all duration-300 hover:scale-110">
           <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=user`} />
           <AvatarFallback>В</AvatarFallback>
         </Avatar>
