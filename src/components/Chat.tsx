@@ -45,58 +45,59 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Диалог для ввода имени пользователя */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => {
-        // Предотвращаем закрытие диалога при клике вне, если имя не введено
-        if (!open && !username.trim()) return;
-        setIsDialogOpen(open);
-      }}>
-        <DialogContent className="animate-in fade-in-0 zoom-in-95 data-[state=open]:duration-500">
-          <DialogHeader>
-            <DialogTitle>Представьтесь, пожалуйста</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Input
-                placeholder="Ваше имя"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="transition-all duration-300 focus:scale-105"
-              />
+      
+      // Диалог для ввода имени пользователя
+  <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    // Предотвращаем закрытие диалога при клике вне, если имя не введено
+    if (!open && !username.trim()) return;
+    setIsDialogOpen(open);
+  }}>
+    <DialogContent className="animate-in fade-in-0 zoom-in-95 data-[state=open]:duration-500">
+      <DialogHeader>
+        <DialogTitle>Представьтесь, пожалуйста</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4 py-4">
+        <div className="space-y-2">
+          <Input
+            placeholder="Ваше имя"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="transition-all duration-300 focus:scale-105"
+          />
+        </div>
+        <div className="space-y-2">
+          <Input
+            placeholder="URL WebSocket сервера"
+            value={wsUrl}
+            onChange={(e) => setWsUrl(e.target.value)}
+            className="transition-all duration-300 focus:scale-105"
+          />
+          <p className="text-xs text-muted-foreground">
+            По умолчанию используется эхо-сервер для демонстрации
+          </p>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button 
+          onClick={handleStartChat} 
+          disabled={!username.trim() || isLoading}
+          className="relative overflow-hidden transition-all duration-300 hover:scale-105"
+        >
+          {isLoading ? (
+            <div className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Подключение...
             </div>
-            <div className="space-y-2">
-              <Input
-                placeholder="URL WebSocket сервера"
-                value={wsUrl}
-                onChange={(e) => setWsUrl(e.target.value)}
-                className="transition-all duration-300 focus:scale-105"
-              />
-              <p className="text-xs text-muted-foreground">
-                По умолчанию используется эхо-сервер для демонстрации
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              onClick={handleStartChat} 
-              disabled={!username.trim() || isLoading}
-              className="relative overflow-hidden transition-all duration-300 hover:scale-105"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Подключение...
-                </div>
-              ) : (
-                "Начать общение"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          ) : (
+            "Начать общение"
+          )}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
       {/* Заголовок чата */}
       <div className="bg-primary/10 p-3 flex justify-between items-center border-b transition-all duration-300 hover:bg-primary/20">

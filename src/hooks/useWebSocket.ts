@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Определяем типы для сообщений
@@ -29,8 +28,8 @@ export const useWebSocket = (url: string, username: string) => {
   // Функция для установки соединения
   const connect = useCallback(() => {
     try {
-      // В реальном приложении используйте URL вашего WebSocket сервера
-      // Для локальной разработки можно использовать сервисы типа ws://localhost:8080
+      if (!url) return; // Не пытаемся подключиться если URL не указан
+      
       const ws = new WebSocket(url);
       socket.current = ws;
 
@@ -38,15 +37,35 @@ export const useWebSocket = (url: string, username: string) => {
         setIsConnected(true);
         setError(null);
         // Отправляем информацию о пользователе при подключении
-        ws.send(JSON.stringify({
-          type: 'connection',
-          data: { username }
-        }));
+        try {
+          ws.send(JSON.stringify({
+            type: 'connection',
+            data: { username }
+          }));
+        } catch (error) {
+          console.log('Ошибка отправки данных о пользователе');
+        }
       };
 
       ws.onmessage = (event) => {
         try {
-          const wsEvent: WebSocketEvent = JSON.parse(event.data);
+          // Проверяем, является ли ответ JSON-данными
+          let wsEvent: WebSocketEvent;
+          
+          try {
+            wsEvent = JSON.parse(event.data);
+          } catch (jsonError) {
+            // Если не JSON, создаем эхо-сообщение
+            const echoMessage: MessageData = {
+              id: Date.now().toString(),
+              text: event.data,
+              sender: 'other',
+              username: 'Эхо-сервер',
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, echoMessage]);
+            return;
+          }
           
           switch(wsEvent.type) {
             case 'message':
@@ -95,23 +114,47 @@ export const useWebSocket = (url: string, username: string) => {
   // Функция для отправки сообщения
   const sendMessage = useCallback((text: string) => {
     if (socket.current && socket.current.readyState === WebSocket.OPEN) {
-      const messageData: Omit<MessageData, 'id' | 'timestamp'> & {timestamp: string} = {
-        text,
-        sender: 'user',
-        username,
-        timestamp: new Date().toISOString()
-      };
-      
-      socket.current.send(JSON.stringify({
-        type: 'message',
-        data: messageData
-      }));
+      try {
+        // Добавляем сообщение локально
+        const newMessage: MessageData = {
+          id: Date.now().toString(),
+          text,
+          sender: 'user',
+          username,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, newMessage]);
+        
+        // Пытаемся отправить как JSON
+        try {
+          socket.current.send(JSON.stringify({
+            type: 'message',
+            data: {
+              text,
+              sender: 'user',
+              username,
+              timestamp: new Date().toISOString()
+            }
+          }));
+        } catch (error) {
+          // Если не удается отправить как JSON, отправляем как текст
+          socket.current.send(text);
+        }
+      } catch (error) {
+        console.error('Ошибка отправки сообщения:', error);
+        setError('Не удалось отправить сообщение');
+      }
+    } else {
+      setError('Соединение не установлено');
     }
   }, [username]);
 
   // Подключаемся при монтировании компонента
   useEffect(() => {
-    connect();
+    if (username) {
+      connect();
+    }
     
     // Очищаем при размонтировании
     return () => {
@@ -122,7 +165,7 @@ export const useWebSocket = (url: string, username: string) => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [connect]);
+  }, [connect, username]);
 
   return {
     isConnected,
